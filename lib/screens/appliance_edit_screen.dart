@@ -6,7 +6,7 @@ import '../services/storage_service.dart';
 class ApplianceEditScreen extends StatefulWidget {
   final Appliance? appliance;
 
-  const ApplianceEditScreen({Key? key, this.appliance}) : super(key: key);
+  const ApplianceEditScreen({super.key, this.appliance});
 
   @override
   State<ApplianceEditScreen> createState() => _ApplianceEditScreenState();

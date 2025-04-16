@@ -8,12 +8,12 @@ class ApplianceCard extends StatelessWidget {
   final bool showLocation;
 
   const ApplianceCard({
-    Key? key,
+    super.key,
     required this.appliance,
     required this.onEdit,
     required this.onDelete,
     this.showLocation = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

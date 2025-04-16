@@ -3,9 +3,10 @@ import '../models/appliance.dart';
 import '../services/storage_service.dart';
 import '../widgets/appliance_card.dart';
 import 'appliance_edit_screen.dart';
+import '../widgets/consumption_summary.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -16,6 +17,11 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Appliance> appliances = [];
   bool _isLoading = true;
   bool _groupByLocation = false;
+  
+  // Cache for grouped appliances
+  final Map<String, List<Appliance>> _groupedAppliancesCache = {};
+  List<String> _sortedLocationsCache = [];
+  double _totalConsumptionCache = 0;
 
   @override
   void initState() {
@@ -32,14 +38,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _sortAppliances() {
     appliances.sort((a, b) => b.dailyConsumption.compareTo(a.dailyConsumption));
+    _updateCaches();
   }
 
-  double get totalDailyConsumption {
-    return appliances.fold(
+  void _updateCaches() {
+    // Update total consumption cache
+    _totalConsumptionCache = appliances.fold(
       0,
       (total, appliance) => total + appliance.dailyConsumption,
     );
+
+    // Update grouped appliances cache
+    _groupedAppliancesCache.clear();
+    for (final appliance in appliances) {
+      final location = 'Location: ${appliance.location ?? 'Other'}';
+      _groupedAppliancesCache.putIfAbsent(location, () => []).add(appliance);
+    }
+
+    // Update sorted locations cache
+    _sortedLocationsCache = _groupedAppliancesCache.keys.toList()
+      ..sort((a, b) {
+        final aConsumption = _groupedAppliancesCache[a]!
+            .fold(0.0, (sum, item) => sum + item.dailyConsumption);
+        final bConsumption = _groupedAppliancesCache[b]!
+            .fold(0.0, (sum, item) => sum + item.dailyConsumption);
+        return bConsumption.compareTo(aConsumption);
+      });
   }
+
+  double get totalDailyConsumption => _totalConsumptionCache;
 
   Future<void> _navigateToEditScreen(BuildContext context, [Appliance? appliance]) async {
     final result = await Navigator.push<bool>(
@@ -57,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _deleteAppliance(String id) async {
     setState(() {
       appliances.removeWhere((appliance) => appliance.id == id);
+      _updateCaches(); // Update caches after modifying appliances
     });
     await _saveAppliances();
   }
@@ -106,22 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLocationGroupedList() {
-    // Group appliances by location
-    final groupedAppliances = <String, List<Appliance>>{};
-    for (final appliance in appliances) {
-      final location = 'Location: ${appliance.location ?? 'Other'}';
-      groupedAppliances.putIfAbsent(location, () => []).add(appliance);
-    }
-
-    // Sort locations by total consumption
-    final sortedLocations = groupedAppliances.keys.toList()
-      ..sort((a, b) {
-        final aConsumption = groupedAppliances[a]!
-            .fold(0.0, (sum, item) => sum + item.dailyConsumption);
-        final bConsumption = groupedAppliances[b]!
-            .fold(0.0, (sum, item) => sum + item.dailyConsumption);
-        return bConsumption.compareTo(aConsumption);
-      });
+    // Use cached values instead of recalculating
+    final groupedAppliances = _groupedAppliancesCache;
+    final sortedLocations = _sortedLocationsCache;
 
     return ListView.builder(
       itemCount: sortedLocations.length,
@@ -223,60 +238,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                   ),
                                   const SizedBox(height: 16),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.surface,
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Daily:',
-                                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                                    color: Theme.of(context).colorScheme.onSurface,
-                                                  ),
-                                            ),
-                                            Text(
-                                              '${totalDailyConsumption.toStringAsFixed(2)} kWh',
-                                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                                    color: Theme.of(context).colorScheme.primary,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Monthly:',
-                                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                                    color: Theme.of(context).colorScheme.onSurface,
-                                                  ),
-                                            ),
-                                            Text(
-                                              '${(totalDailyConsumption * 30).toStringAsFixed(2)} kWh',
-                                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                                    color: Theme.of(context).colorScheme.primary,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                  ConsumptionSummary(
+                                    dailyConsumption: totalDailyConsumption,
+                                    applianceCount: appliances.length,
                                   ),
                                 ],
                               ),

@@ -6,24 +6,43 @@ void main() {
 }
 
 class WattWiseApp extends StatelessWidget {
-  const WattWiseApp({Key? key}) : super(key: key);
+  const WattWiseApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'WattWise',
       theme: ThemeData(
-        primarySwatch: Colors.indigo,
-        brightness: Brightness.light,
         useMaterial3: true,
+        colorScheme: ColorScheme.light(
+          primary: Color(0xFF2ECC71),      // Emerald green
+          secondary: Color(0xFF3498DB),     // Ocean blue
+          tertiary: Color(0xFFF1C40F),      // Sunny yellow
+          surface: Colors.white,
+          surfaceContainer: Color(0xFFF5F6FA),    // Light gray-blue
+          error: Color(0xFFE74C3C),         // Coral red
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
+          onSurface: Color(0xFF2C3E50),     // Dark blue-gray
+        ),
         iconTheme: const IconThemeData(
-          color: Colors.indigo,
+          color: Color(0xFF2ECC71),
         ),
       ),
       darkTheme: ThemeData(
-        primarySwatch: Colors.indigo,
-        brightness: Brightness.dark,
         useMaterial3: true,
+        colorScheme: ColorScheme.dark(
+          primary: Color(0xFF2ECC71),       // Emerald green
+          secondary: Color(0xFF3498DB),      // Ocean blue
+          tertiary: Color(0xFFF1C40F),       // Sunny yellow
+          surface: Color(0xFF1E272E),        // Dark blue-gray
+          surfaceContainer: Color(0xFF0F1419),     // Very dark blue-gray
+          error: Color(0xFFE74C3C),          // Coral red
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
+          onSurface: Colors.white,
+        ),
       ),
       themeMode: ThemeMode.system,
       home: const HomeScreen(),
