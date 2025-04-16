@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "my_kilowatt_needs" "\0"
+            VALUE "FileDescription", "watt_wise" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "my_kilowatt_needs" "\0"
+            VALUE "InternalName", "watt_wise" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "my_kilowatt_needs.exe" "\0"
-            VALUE "ProductName", "my_kilowatt_needs" "\0"
+            VALUE "OriginalFilename", "watt_wise.exe" "\0"
+            VALUE "ProductName", "watt_wise" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

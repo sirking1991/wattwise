@@ -187,23 +187,50 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment<bool>(
-                      value: true,
-                      label: Text('Watts'),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                      width: 1,
                     ),
-                    ButtonSegment<bool>(
-                      value: false,
-                      label: Text('Amps'),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment<bool>(
+                        value: true,
+                        label: Text('Watts'),
+                      ),
+                      ButtonSegment<bool>(
+                        value: false,
+                        label: Text('Amps'),
+                      ),
+                    ],
+                    selected: {_isWatts},
+                    onSelectionChanged: (Set<bool> selected) {
+                      setState(() {
+                        _isWatts = selected.first;
+                      });
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.selected)) {
+                            return Theme.of(context).colorScheme.secondaryContainer;
+                          }
+                          return Colors.transparent;
+                        },
+                      ),
+                      foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (Set<MaterialState> states) {
+                          if (states.contains(MaterialState.selected)) {
+                            return Theme.of(context).colorScheme.onSecondaryContainer;
+                          }
+                          return Theme.of(context).colorScheme.onSurface;
+                        },
+                      ),
                     ),
-                  ],
-                  selected: {_isWatts},
-                  onSelectionChanged: (Set<bool> selected) {
-                    setState(() {
-                      _isWatts = selected.first;
-                    });
-                  },
+                  ),
                 ),
               ],
             ),

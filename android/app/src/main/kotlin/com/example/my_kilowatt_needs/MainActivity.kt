@@ -1,4 +1,4 @@
-package com.example.my_kilowatt_needs
+package com.example.watt_wise
 
 import io.flutter.embedding.android.FlutterActivity
 

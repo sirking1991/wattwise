@@ -1,4 +1,4 @@
-# my_kilowatt_needs
+# watt_wise
 
 A new Flutter project.
 
