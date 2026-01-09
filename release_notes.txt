@@ -1,0 +1,14 @@
+<en-GB>
+🌟 Welcome to WattWise - Your Intelligent Document Assistant!
+
+We are thrilled to bring you the first release of WattWise. This app is designed to streamline your document management with the power of AI.
+
+Key Features in this Release:
+📸 Smart Document Scanning: Capture clear, high-quality scans of your documents instantly.
+🤖 AI-Powered Insights: Chat with your documents! Get summaries and answers instantly using advanced AI.
+✏️ Advanced Editing: Crop, rotate, and perfect your scans with our intuitive editor.
+📝 Integrated Notes: Keep your thoughts and document details organized in one place.
+☁️ Secure Cloud Storage: Your documents are safe and accessible whenever you need them.
+
+Experience a smarter way to manage your paperwork. Download WattWise today!
+</en-GB>
