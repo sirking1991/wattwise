@@ -4,6 +4,7 @@ import '../services/storage_service.dart';
 import '../widgets/appliance_card.dart';
 import 'appliance_edit_screen.dart';
 import '../widgets/consumption_summary.dart';
+import 'account_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -198,6 +199,19 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
             tooltip: _groupByLocation ? 'List View' : 'Group by Location',
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AccountScreen(),
+                ),
+              );
+              _loadAppliances();
+            },
+            tooltip: 'Account',
           ),
         ],
       ),
