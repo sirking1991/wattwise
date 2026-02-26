@@ -6,6 +6,8 @@ class ApplianceCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final bool showLocation;
+  final double costPerKwh;
+  final String currencySymbol;
 
   const ApplianceCard({
     super.key,
@@ -13,10 +15,14 @@ class ApplianceCard extends StatelessWidget {
     required this.onEdit,
     required this.onDelete,
     this.showLocation = true,
+    this.costPerKwh = 0.0,
+    this.currencySymbol = '\$',
   });
 
   @override
   Widget build(BuildContext context) {
+    final dailyCost = appliance.dailyConsumption * costPerKwh;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
@@ -80,6 +86,15 @@ class ApplianceCard extends StatelessWidget {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
+                      if (costPerKwh > 0)
+                        Text(
+                          '$currencySymbol${dailyCost.toStringAsFixed(2)}/day',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                        ),
                       Text(
                         'per day',
                         style: TextStyle(

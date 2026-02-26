@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/appliance.dart';
+import '../models/appliance_template.dart';
+import '../models/consumption_snapshot.dart';
 import '../services/storage_service.dart';
+import '../services/settings_service.dart';
+import '../services/history_service.dart';
 import '../widgets/appliance_card.dart';
-import 'appliance_edit_screen.dart';
+import '../widgets/budget_progress.dart';
 import '../widgets/consumption_summary.dart';
+import 'appliance_edit_screen.dart';
+import 'budget_screen.dart';
+import 'template_picker_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,11 +21,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _storageService = StorageService();
+  final _settingsService = SettingsService();
+  final _historyService = HistoryService();
+
   List<Appliance> appliances = [];
   bool _isLoading = true;
   bool _groupByLocation = false;
-  
-  // Cache for grouped appliances
+
+  double _costPerKwh = 0.12;
+  String _currencySymbol = '\$';
+  double? _monthlyBudget;
+  String _budgetType = 'cost';
+
   final Map<String, List<Appliance>> _groupedAppliancesCache = {};
   List<String> _sortedLocationsCache = [];
   double _totalConsumptionCache = 0;
@@ -26,13 +40,28 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAppliances();
+    _loadAll();
   }
 
-  Future<void> _loadAppliances() async {
+  Future<void> _loadAll() async {
     setState(() => _isLoading = true);
-    appliances = await _storageService.loadAppliances();
+
+    final results = await Future.wait([
+      _storageService.loadAppliances(),
+      _settingsService.getCostPerKwh(),
+      _settingsService.getCurrencySymbol(),
+      _settingsService.getMonthlyBudget(),
+      _settingsService.getBudgetType(),
+    ]);
+
+    appliances = results[0] as List<Appliance>;
+    _costPerKwh = results[1] as double;
+    _currencySymbol = results[2] as String;
+    _monthlyBudget = results[3] as double?;
+    _budgetType = results[4] as String;
+
     _sortAppliances();
+    _recordSnapshot();
     setState(() => _isLoading = false);
   }
 
@@ -42,20 +71,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _updateCaches() {
-    // Update total consumption cache
     _totalConsumptionCache = appliances.fold(
       0,
       (total, appliance) => total + appliance.dailyConsumption,
     );
 
-    // Update grouped appliances cache
     _groupedAppliancesCache.clear();
     for (final appliance in appliances) {
       final location = 'Location: ${appliance.location ?? 'Other'}';
       _groupedAppliancesCache.putIfAbsent(location, () => []).add(appliance);
     }
 
-    // Update sorted locations cache
     _sortedLocationsCache = _groupedAppliancesCache.keys.toList()
       ..sort((a, b) {
         final aConsumption = _groupedAppliancesCache[a]!
@@ -68,6 +94,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double get totalDailyConsumption => _totalConsumptionCache;
 
+  Future<void> _recordSnapshot() async {
+    if (appliances.isEmpty) return;
+    final snapshot = ConsumptionSnapshot(
+      date: DateTime.now(),
+      totalDailyKwh: totalDailyConsumption,
+      totalDailyCost: totalDailyConsumption * _costPerKwh,
+      applianceCount: appliances.length,
+    );
+    await _historyService.recordSnapshot(snapshot);
+  }
+
   Future<void> _navigateToEditScreen(BuildContext context, [Appliance? appliance]) async {
     final result = await Navigator.push<bool>(
       context,
@@ -77,22 +114,100 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (result == true) {
-      _loadAppliances();
+      _loadAll();
+    }
+  }
+
+  Future<void> _navigateToEditWithTemplate(BuildContext context, ApplianceTemplate template) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ApplianceEditScreen(template: template),
+      ),
+    );
+
+    if (result == true) {
+      _loadAll();
+    }
+  }
+
+  Future<void> _navigateToBudgetScreen(BuildContext context) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const BudgetScreen(),
+      ),
+    );
+
+    if (result == true) {
+      _loadAll();
     }
   }
 
   Future<void> _deleteAppliance(String id) async {
     setState(() {
       appliances.removeWhere((appliance) => appliance.id == id);
-      _updateCaches(); // Update caches after modifying appliances
+      _updateCaches();
     });
     await _saveAppliances();
+    _recordSnapshot();
   }
 
   Future<void> _saveAppliances() async {
     setState(() => _isLoading = true);
     await _storageService.saveAppliances(appliances);
     setState(() => _isLoading = false);
+  }
+
+  void _showAddOptions(BuildContext outerContext) {
+    showModalBottomSheet(
+      context: outerContext,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Add Appliance',
+                style: Theme.of(sheetContext).textTheme.titleLarge,
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.list_alt, color: Theme.of(sheetContext).colorScheme.primary),
+              title: const Text('Choose from Templates'),
+              subtitle: const Text('Pick from common household appliances'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _pickTemplateAndAdd();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.edit, color: Theme.of(sheetContext).colorScheme.secondary),
+              title: const Text('Add Custom Appliance'),
+              subtitle: const Text('Enter appliance details manually'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _navigateToEditScreen(outerContext);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickTemplateAndAdd() async {
+    final template = await Navigator.push<ApplianceTemplate>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const TemplatePickerScreen(),
+      ),
+    );
+    if (template != null && mounted) {
+      _navigateToEditWithTemplate(context, template);
+    }
   }
 
   Widget _buildEmptyState() {
@@ -126,6 +241,8 @@ class _HomeScreenState extends State<HomeScreen> {
       itemBuilder: (context, index) {
         return ApplianceCard(
           appliance: appliances[index],
+          costPerKwh: _costPerKwh,
+          currencySymbol: _currencySymbol,
           onEdit: () => _navigateToEditScreen(context, appliances[index]),
           onDelete: () => _deleteAppliance(appliances[index].id),
         );
@@ -134,7 +251,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLocationGroupedList() {
-    // Use cached values instead of recalculating
     final groupedAppliances = _groupedAppliancesCache;
     final sortedLocations = _sortedLocationsCache;
 
@@ -173,6 +289,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ...locationAppliances.map((appliance) => ApplianceCard(
                   appliance: appliance,
+                  costPerKwh: _costPerKwh,
+                  currencySymbol: _currencySymbol,
                   onEdit: () => _navigateToEditScreen(context, appliance),
                   onDelete: () => _deleteAppliance(appliance.id),
                   showLocation: false,
@@ -190,6 +308,11 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: const Icon(Icons.electric_bolt, size: 28),
         title: const Text('WattWise'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.savings_outlined),
+            onPressed: () => _navigateToBudgetScreen(context),
+            tooltip: 'Budget',
+          ),
           IconButton(
             icon: Icon(_groupByLocation ? Icons.view_list : Icons.view_module),
             onPressed: () {
@@ -241,6 +364,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ConsumptionSummary(
                                     dailyConsumption: totalDailyConsumption,
                                     applianceCount: appliances.length,
+                                    costPerKwh: _costPerKwh,
+                                    currencySymbol: _currencySymbol,
                                   ),
                                 ],
                               ),
@@ -257,6 +382,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
+                  BudgetProgress(
+                    currentMonthlyConsumption: totalDailyConsumption * 30,
+                    costPerKwh: _costPerKwh,
+                    currencySymbol: _currencySymbol,
+                    monthlyBudget: _monthlyBudget,
+                    budgetType: _budgetType,
+                  ),
                 ],
                 Expanded(
                   child: appliances.isEmpty
@@ -268,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToEditScreen(context),
+        onPressed: () => _showAddOptions(context),
         child: const Icon(Icons.add),
       ),
     );

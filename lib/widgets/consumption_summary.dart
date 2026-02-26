@@ -3,15 +3,22 @@ import 'package:flutter/material.dart';
 class ConsumptionSummary extends StatelessWidget {
   final double dailyConsumption;
   final int applianceCount;
+  final double costPerKwh;
+  final String currencySymbol;
 
   const ConsumptionSummary({
     super.key,
     required this.dailyConsumption,
     required this.applianceCount,
+    this.costPerKwh = 0.0,
+    this.currencySymbol = '\$',
   });
 
   @override
   Widget build(BuildContext context) {
+    final dailyCost = dailyConsumption * costPerKwh;
+    final monthlyCost = dailyCost * 30;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -36,12 +43,25 @@ class ConsumptionSummary extends StatelessWidget {
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
               ),
-              Text(
-                '${dailyConsumption.toStringAsFixed(2)} kWh',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${dailyConsumption.toStringAsFixed(2)} kWh',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  if (costPerKwh > 0)
+                    Text(
+                      '$currencySymbol${dailyCost.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
+                ],
               ),
             ],
           ),
@@ -55,12 +75,25 @@ class ConsumptionSummary extends StatelessWidget {
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
               ),
-              Text(
-                '${(dailyConsumption * 30).toStringAsFixed(2)} kWh',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${(dailyConsumption * 30).toStringAsFixed(2)} kWh',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  if (costPerKwh > 0)
+                    Text(
+                      '$currencySymbol${monthlyCost.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
+                ],
               ),
             ],
           ),

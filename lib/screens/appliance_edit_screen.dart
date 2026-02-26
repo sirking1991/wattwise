@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/appliance.dart';
+import '../models/appliance_template.dart';
 import '../services/storage_service.dart';
+import '../services/settings_service.dart';
 
 class ApplianceEditScreen extends StatefulWidget {
   final Appliance? appliance;
+  final ApplianceTemplate? template;
 
-  const ApplianceEditScreen({super.key, this.appliance});
+  const ApplianceEditScreen({super.key, this.appliance, this.template});
 
   @override
   State<ApplianceEditScreen> createState() => _ApplianceEditScreenState();
@@ -15,6 +18,7 @@ class ApplianceEditScreen extends StatefulWidget {
 class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
   final _formKey = GlobalKey<FormState>();
   final _storageService = StorageService();
+  final _settingsService = SettingsService();
   final _nameController = TextEditingController();
   final _powerRatingController = TextEditingController();
   final _hoursPerDayController = TextEditingController();
@@ -23,6 +27,8 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
 
   bool _isWatts = true;
   Set<String> _locationSuggestions = {};
+  double _costPerKwh = 0.12;
+  String _currencySymbol = '\$';
 
   @override
   void initState() {
@@ -31,6 +37,9 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
   }
 
   Future<void> _loadExistingData() async {
+    _costPerKwh = await _settingsService.getCostPerKwh();
+    _currencySymbol = await _settingsService.getCurrencySymbol();
+
     if (widget.appliance != null) {
       _nameController.text = widget.appliance!.name;
       _powerRatingController.text = widget.appliance!.powerRating.toString();
@@ -38,9 +47,14 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
       _brandController.text = widget.appliance!.brand ?? '';
       _locationController.text = widget.appliance?.location ?? '';
       _isWatts = widget.appliance!.isWatts;
+    } else if (widget.template != null) {
+      _nameController.text = widget.template!.name;
+      _powerRatingController.text = widget.template!.typicalWattage.toString();
+      _hoursPerDayController.text = widget.template!.typicalHoursPerDay.toString();
+      _isWatts = true;
+      _locationController.text = widget.template!.category;
     }
 
-    // Load location suggestions from existing appliances
     final appliances = await _storageService.loadAppliances();
     setState(() {
       _locationSuggestions = appliances
@@ -113,7 +127,7 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
     final appliances = await _storageService.loadAppliances();
     appliances.removeWhere((a) => a.id == widget.appliance!.id);
     await _storageService.saveAppliances(appliances);
-    
+
     if (mounted) {
       Navigator.pop(context, true);
     }
@@ -128,11 +142,20 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.appliance != null;
+    final isFromTemplate = widget.template != null;
+    String title = 'Add Appliance';
+    if (isEditing) {
+      title = 'Edit Appliance';
+    } else if (isFromTemplate) {
+      title = 'Add ${widget.template!.name}';
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.appliance == null ? 'Add Appliance' : 'Edit Appliance'),
+        title: Text(title),
         actions: [
-          if (widget.appliance != null)
+          if (isEditing)
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: _deleteAppliance,
@@ -175,6 +198,7 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                     ],
                     textInputAction: TextInputAction.next,
+                    onChanged: (_) => setState(() {}),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter power rating';
@@ -213,17 +237,17 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
                       });
                     },
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.selected)) {
+                      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.selected)) {
                             return Theme.of(context).colorScheme.secondaryContainer;
                           }
                           return Colors.transparent;
                         },
                       ),
-                      foregroundColor: MaterialStateProperty.resolveWith<Color>(
-                        (Set<MaterialState> states) {
-                          if (states.contains(MaterialState.selected)) {
+                      foregroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                          if (states.contains(WidgetState.selected)) {
                             return Theme.of(context).colorScheme.onSecondaryContainer;
                           }
                           return Theme.of(context).colorScheme.onSurface;
@@ -258,6 +282,7 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
               ],
               textInputAction: TextInputAction.next,
+              onChanged: (_) => setState(() {}),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter hours per day';
@@ -306,7 +331,6 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
                 FocusNode focusNode,
                 VoidCallback onFieldSubmitted,
               ) {
-                // controller is managed internally
                 return TextFormField(
                   controller: _locationController,
                   focusNode: focusNode,
@@ -346,6 +370,17 @@ class _ApplianceEditScreenState extends State<ApplianceEditScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      if (_costPerKwh > 0) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '$_currencySymbol${(_calculateDailyConsumption() * _costPerKwh).toStringAsFixed(2)}/day  ·  $_currencySymbol${(_calculateDailyConsumption() * _costPerKwh * 30).toStringAsFixed(2)}/month',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.secondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

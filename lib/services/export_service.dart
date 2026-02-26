@@ -8,6 +8,8 @@ import 'package:share_plus/share_plus.dart';
 import '../models/appliance.dart';
 import '../models/consumption_snapshot.dart';
 
+export 'package:share_plus/share_plus.dart' show XFile;
+
 class ExportService {
   Future<String> generateCsv({
     required List<Appliance> appliances,
@@ -153,8 +155,9 @@ class ExportService {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/wattwise_report.csv');
     await file.writeAsString(csvContent);
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], text: 'WattWise Energy Report'),
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: 'WattWise Energy Report',
     );
   }
 
@@ -173,8 +176,9 @@ class ExportService {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/wattwise_report.pdf');
     await file.writeAsBytes(await pdf.save());
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], text: 'WattWise Energy Report'),
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      text: 'WattWise Energy Report',
     );
   }
 }
