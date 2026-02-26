@@ -23,6 +23,8 @@ A Flutter mobile app for tracking household energy consumption. Purely client-si
 
 ### Notes
 
-- `flutter analyze` reports pre-existing issues: 6 info-level deprecation warnings (`MaterialStateProperty` → `WidgetStateProperty`), 1 unused-field warning in `budget_screen.dart`, and 4 errors in `export_service.dart` (stale `SharePlus`/`ShareParams` API). These are not caused by agent changes.
+- `flutter analyze` should report zero issues. If deprecation warnings appear in future Flutter versions, they are non-blocking.
 - The widget test in `test/widget_test.dart` is the default Flutter counter-app boilerplate and does **not** match the actual WattWise app. It is expected to fail.
 - To manually test the web build, run `flutter build web --debug` then serve `build/web/` on any HTTP server (e.g. `python3 -m http.server 8080 --directory build/web`).
+- The app uses bottom navigation with 3 tabs: Home, History, Settings.
+- Key dependencies: `fl_chart` (charts), `pdf`/`csv` (export), `share_plus` (share files), `intl` (formatting).
