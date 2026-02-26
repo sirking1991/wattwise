@@ -1,0 +1,58 @@
+[
+  {"name": "Refrigerator", "typicalWattage": 150, "category": "Kitchen", "icon": "kitchen", "typicalHoursPerDay": 24},
+  {"name": "Freezer", "typicalWattage": 200, "category": "Kitchen", "icon": "kitchen", "typicalHoursPerDay": 24},
+  {"name": "Microwave Oven", "typicalWattage": 1000, "category": "Kitchen", "icon": "microwave", "typicalHoursPerDay": 0.5},
+  {"name": "Dishwasher", "typicalWattage": 1800, "category": "Kitchen", "icon": "kitchen", "typicalHoursPerDay": 1},
+  {"name": "Electric Oven", "typicalWattage": 2500, "category": "Kitchen", "icon": "kitchen", "typicalHoursPerDay": 1},
+  {"name": "Electric Stove/Cooktop", "typicalWattage": 2000, "category": "Kitchen", "icon": "kitchen", "typicalHoursPerDay": 1.5},
+  {"name": "Toaster", "typicalWattage": 850, "category": "Kitchen", "icon": "kitchen", "typicalHoursPerDay": 0.2},
+  {"name": "Coffee Maker", "typicalWattage": 900, "category": "Kitchen", "icon": "coffee", "typicalHoursPerDay": 0.3},
+  {"name": "Electric Kettle", "typicalWattage": 1500, "category": "Kitchen", "icon": "kitchen", "typicalHoursPerDay": 0.2},
+  {"name": "Blender", "typicalWattage": 400, "category": "Kitchen", "icon": "blender", "typicalHoursPerDay": 0.1},
+
+  {"name": "LED TV (55\")", "typicalWattage": 100, "category": "Living Room", "icon": "tv", "typicalHoursPerDay": 5},
+  {"name": "OLED TV (65\")", "typicalWattage": 150, "category": "Living Room", "icon": "tv", "typicalHoursPerDay": 5},
+  {"name": "Soundbar", "typicalWattage": 30, "category": "Living Room", "icon": "speaker", "typicalHoursPerDay": 4},
+  {"name": "Game Console", "typicalWattage": 200, "category": "Living Room", "icon": "gamepad", "typicalHoursPerDay": 2},
+  {"name": "Streaming Device", "typicalWattage": 5, "category": "Living Room", "icon": "tv", "typicalHoursPerDay": 5},
+  {"name": "Floor Lamp", "typicalWattage": 60, "category": "Living Room", "icon": "light", "typicalHoursPerDay": 5},
+  {"name": "Ceiling Fan", "typicalWattage": 75, "category": "Living Room", "icon": "air", "typicalHoursPerDay": 8},
+
+  {"name": "Window AC Unit", "typicalWattage": 1200, "category": "Climate", "icon": "ac_unit", "typicalHoursPerDay": 8},
+  {"name": "Central AC", "typicalWattage": 3500, "category": "Climate", "icon": "ac_unit", "typicalHoursPerDay": 8},
+  {"name": "Portable AC", "typicalWattage": 1400, "category": "Climate", "icon": "ac_unit", "typicalHoursPerDay": 6},
+  {"name": "Space Heater", "typicalWattage": 1500, "category": "Climate", "icon": "thermostat", "typicalHoursPerDay": 6},
+  {"name": "Electric Radiator", "typicalWattage": 1000, "category": "Climate", "icon": "thermostat", "typicalHoursPerDay": 8},
+  {"name": "Dehumidifier", "typicalWattage": 300, "category": "Climate", "icon": "water_drop", "typicalHoursPerDay": 12},
+  {"name": "Humidifier", "typicalWattage": 40, "category": "Climate", "icon": "water_drop", "typicalHoursPerDay": 8},
+  {"name": "Air Purifier", "typicalWattage": 50, "category": "Climate", "icon": "air", "typicalHoursPerDay": 12},
+
+  {"name": "Washing Machine", "typicalWattage": 500, "category": "Laundry", "icon": "local_laundry_service", "typicalHoursPerDay": 1},
+  {"name": "Clothes Dryer", "typicalWattage": 5000, "category": "Laundry", "icon": "local_laundry_service", "typicalHoursPerDay": 1},
+  {"name": "Iron", "typicalWattage": 1200, "category": "Laundry", "icon": "iron", "typicalHoursPerDay": 0.5},
+
+  {"name": "Desktop Computer", "typicalWattage": 300, "category": "Office", "icon": "computer", "typicalHoursPerDay": 8},
+  {"name": "Laptop", "typicalWattage": 65, "category": "Office", "icon": "laptop", "typicalHoursPerDay": 8},
+  {"name": "Monitor (27\")", "typicalWattage": 40, "category": "Office", "icon": "monitor", "typicalHoursPerDay": 8},
+  {"name": "Laser Printer", "typicalWattage": 600, "category": "Office", "icon": "print", "typicalHoursPerDay": 0.5},
+  {"name": "Wi-Fi Router", "typicalWattage": 12, "category": "Office", "icon": "router", "typicalHoursPerDay": 24},
+
+  {"name": "Hair Dryer", "typicalWattage": 1800, "category": "Bathroom", "icon": "shower", "typicalHoursPerDay": 0.2},
+  {"name": "Electric Toothbrush Charger", "typicalWattage": 2, "category": "Bathroom", "icon": "shower", "typicalHoursPerDay": 24},
+  {"name": "Bathroom Exhaust Fan", "typicalWattage": 30, "category": "Bathroom", "icon": "air", "typicalHoursPerDay": 2},
+  {"name": "Towel Warmer", "typicalWattage": 100, "category": "Bathroom", "icon": "shower", "typicalHoursPerDay": 4},
+
+  {"name": "Electric Water Heater", "typicalWattage": 4500, "category": "Utility", "icon": "water_drop", "typicalHoursPerDay": 3},
+  {"name": "Tankless Water Heater", "typicalWattage": 8000, "category": "Utility", "icon": "water_drop", "typicalHoursPerDay": 1},
+  {"name": "Sump Pump", "typicalWattage": 400, "category": "Utility", "icon": "water_drop", "typicalHoursPerDay": 0.5},
+  {"name": "Garage Door Opener", "typicalWattage": 400, "category": "Utility", "icon": "garage", "typicalHoursPerDay": 0.1},
+  {"name": "Security System", "typicalWattage": 15, "category": "Utility", "icon": "security", "typicalHoursPerDay": 24},
+  {"name": "LED Light Bulb", "typicalWattage": 10, "category": "Utility", "icon": "lightbulb", "typicalHoursPerDay": 6},
+  {"name": "Incandescent Bulb", "typicalWattage": 60, "category": "Utility", "icon": "lightbulb", "typicalHoursPerDay": 6},
+  {"name": "Pool Pump", "typicalWattage": 1500, "category": "Utility", "icon": "pool", "typicalHoursPerDay": 8},
+
+  {"name": "Electric Blanket", "typicalWattage": 200, "category": "Bedroom", "icon": "bed", "typicalHoursPerDay": 8},
+  {"name": "Bedside Lamp", "typicalWattage": 15, "category": "Bedroom", "icon": "lightbulb", "typicalHoursPerDay": 3},
+  {"name": "Phone Charger", "typicalWattage": 20, "category": "Bedroom", "icon": "phone_android", "typicalHoursPerDay": 8},
+  {"name": "Alarm Clock", "typicalWattage": 5, "category": "Bedroom", "icon": "alarm", "typicalHoursPerDay": 24}
+]
